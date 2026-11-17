@@ -1,0 +1,672 @@
+#+TITLE: Emacs IDE config (Gentoo)
+#+OPTIONS: toc:nil num:nil
+#+STARTUP: showall
+
+* Core boot + package system
+#+begin_src emacs-lisp
+;; Keep startup clean and deterministic.
+(setq inhibit-startup-screen t
+      ring-bell-function 'ignore)
+
+;; Package manager
+(require 'package)
+(setq package-archives
+      '(("gnu"   . "https://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")))
+
+;; Modern Emacs auto-initializes packages; calling package-initialize is usually unnecessary.
+;; If you want maximum compatibility with older versions, you can uncomment:
+;; (package-initialize)
+
+(unless package-archive-contents
+  (package-refresh-contents))
+
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+
+(require 'use-package)
+(setq use-package-always-ensure t)
+#+end_src
+
+* Theme load path
+#+begin_src emacs-lisp
+;; Your custom themes live here:
+;; ~/.emacs.d/themes/laintheme-theme.el  (and any others you add)
+(add-to-list 'custom-theme-load-path
+             (expand-file-name "themes" user-emacs-directory))
+#+end_src
+
+* Theme settings and loading
+#+begin_src emacs-lisp
+;; Optional: install modus-themes package so the variables exist even on older Emacs.
+;; (On newer Emacs, Modus themes are often built-in, but ensuring doesn't hurt.)
+(use-package modus-themes
+  :ensure t
+  :config
+  (setq modus-themes-italic-constructs t
+        modus-themes-bold-constructs t
+        modus-themes-mixed-fonts t
+        modus-themes-variable-pitch-ui nil))
+
+;; Load themes in a deterministic order:
+;; 1) clear any prior themes
+;; 2) load Modus as a strong base
+;; 3) load hacktheme (.hack//SIGN × Shikigami) to override
+(mapc #'disable-theme custom-enabled-themes)
+(load-theme 'modus-vivendi t)
+(load-theme 'hacktheme t)
+#+end_src
+
+* .hack//SIGN UI — Dashboard + Modeline + Tab Bar + Sidebar
+
+** Nerd Icons (required for doom-modeline, treemacs, dashboard)
+#+begin_src emacs-lisp
+(use-package nerd-icons
+  :config
+  ;; Run M-x nerd-icons-install-fonts once after first install
+  )
+#+end_src
+
+** Doom Modeline — The World system bar
+#+begin_src emacs-lisp
+(use-package doom-modeline
+  :init (doom-modeline-mode 1)
+  :config
+  (setq doom-modeline-height 28
+        doom-modeline-bar-width 3
+        doom-modeline-icon t
+        doom-modeline-major-mode-icon t
+        doom-modeline-major-mode-color-icon t
+        doom-modeline-buffer-file-name-style 'truncate-with-project
+        doom-modeline-buffer-modification-icon t
+        doom-modeline-minor-modes nil
+        doom-modeline-vcs-max-length 20
+        doom-modeline-time nil
+        doom-modeline-env-version t)
+
+  ;; Custom Shikigami segment — shows scan status in modeline
+  (doom-modeline-def-segment shikigami-status
+    (when (bound-and-true-p shinigami-mode)
+      (let ((status (if (boundp 'shinigami--scan-status)
+                        shinigami--scan-status
+                      "待機")))
+        (propertize (format " 式神:%s " status)
+                    'face (cond
+                           ((string-match-p "scanning\\|走査" status)
+                            '(:foreground "#00CED1" :bold t))
+                           ((string-match-p "finding\\|発見" status)
+                            '(:foreground "#FFB347" :bold t))
+                           ((string-match-p "critical\\|危険" status)
+                            '(:foreground "#FF4040" :bold t))
+                           (t '(:foreground "#7A6A90")))))))
+
+  ;; Inject into modeline
+  (doom-modeline-def-modeline 'shikigami-line
+    '(bar workspace-name window-number modals matches
+      buffer-info remote-host buffer-position word-count
+      parrot selection-info)
+    '(shikigami-status misc-info minor-modes
+      input-method buffer-encoding major-mode
+      process vcs check))
+
+  (defun my/setup-shikigami-modeline ()
+    (doom-modeline-set-modeline 'shikigami-line 'default))
+  (add-hook 'doom-modeline-mode-hook #'my/setup-shikigami-modeline))
+#+end_src
+
+** Tab Bar — The World gate select
+#+begin_src emacs-lisp
+(tab-bar-mode 1)
+(setq tab-bar-show t
+      tab-bar-new-button-show nil
+      tab-bar-close-button-show nil
+      tab-bar-format '(tab-bar-format-tabs tab-bar-separator)
+      tab-bar-tab-hints t
+      tab-bar-auto-width nil)
+
+;; Pre-create workspace tabs for Shikigami ecosystem
+;; Uses nerd-icons glyphs (guaranteed to render) instead of emoji
+(defun my/setup-shikigami-tabs ()
+  "Create .hack//SIGN workspace layout."
+  (interactive)
+  (tab-bar-rename-tab "⛩ C2 式神")           ; main workspace
+  (tab-bar-new-tab)
+  (tab-bar-rename-tab "🦊 狐 Kitsuneki")    ; recon
+  (tab-bar-new-tab)
+  (tab-bar-rename-tab "🐦 鴉 Kurasu")       ; exploitation
+  (tab-bar-new-tab)
+  (tab-bar-rename-tab "🌙 月 Tsuki")        ; sessions
+  (tab-bar-new-tab)
+  (tab-bar-rename-tab "📜 研 Research")      ; research
+  (tab-bar-select-tab 1))                 ; return to C2
+
+(global-set-key (kbd "C-c w s") #'my/setup-shikigami-tabs)
+#+end_src
+
+** Treemacs — project sidebar
+#+begin_src emacs-lisp
+(use-package treemacs
+  :bind (("C-c s t" . treemacs)
+         ("C-c s 1" . treemacs-select-window))
+  :config
+  (setq treemacs-width 30
+        treemacs-is-never-other-window t
+        treemacs-show-hidden-files t
+        treemacs-no-png-images nil
+        treemacs-indentation 2
+        treemacs-space-between-root-nodes nil)
+
+  ;; Add Shikigami projects to treemacs
+  (defun my/treemacs-add-shikigami ()
+    "Add Shikigami ecosystem projects to treemacs workspace."
+    (interactive)
+    (treemacs-do-add-project-to-workspace
+     (expand-file-name "~/projects/shikigami") "式 Shikigami")
+    (treemacs-do-add-project-to-workspace
+     (expand-file-name "~/projects/izanami-sophia") "⚡ Izanami")
+    (treemacs-do-add-project-to-workspace
+     (expand-file-name "~/projects/shinigami-emacs") "💀 Shinigami")
+    (treemacs-do-add-project-to-workspace
+     (expand-file-name "~/projects/kagami") "🪞 Kagami")
+    (message "式神 ecosystem loaded."))
+
+  (global-set-key (kbd "C-c w p") #'my/treemacs-add-shikigami))
+
+(use-package treemacs-magit
+  :after (treemacs magit))
+#+end_src
+
+** Dashboard — .hack//SIGN login screen
+#+begin_src emacs-lisp
+(use-package dashboard
+  :config
+  (setq dashboard-center-content t
+        dashboard-vertically-center-content t
+        dashboard-set-heading-icons t
+        dashboard-set-file-icons t
+        dashboard-icon-type 'nerd-icons
+        dashboard-set-navigator t
+        dashboard-projects-backend 'project-el
+
+        ;; Content
+        dashboard-items '((recents . 8)
+                          (projects . 5)
+                          (agenda . 5))
+
+        ;; .hack//SIGN header
+        dashboard-banner-logo-title
+        "T H E   W O R L D   //   式 神 起 動 完 了"
+
+        ;; Footer messages — rotate on each launch
+        dashboard-footer-messages
+        '("「この世界に、偶然なんてない。あるのは必然だけ」 — CLAMP/知世"
+          "接続完了 — Connection established. Welcome back."
+          "狐の目は全てを見る — The fox's eyes see everything."
+          "我は汝、汝は我 — I am thou, thou art I."
+          "The World is not beautiful. Therefore, it is."
+          "式神：待機中 — Shikigami: standing by."
+          "天照起動 — Amaterasu online."))
+
+  ;; ASCII art splash — .hack gate
+  (setq dashboard-startup-banner nil)  ; disable default
+  (defun my/hack-splash ()
+    "Insert .hack//SIGN ASCII art into dashboard."
+    (let ((art '(""
+                 "            +------------------------------------------+"
+                 "            |                                          |"
+                 "            |        .hack//SHIKIGAMI                  |"
+                 "            |                                          |"
+                 "            |        +====================+            |"
+                 "            |        |                    |            |"
+                 "            |        |   T H E  W O R L D |            |"
+                 "            |        |                    |            |"
+                 "            |        |   >>> LOGIN OK <<< |            |"
+                 "            |        |                    |            |"
+                 "            |        +====================+            |"
+                 "            |                                          |"
+                 "            |   [C2]  [Kitsuneki]  [Kurasu]  [Tsuki]  |"
+                 "            |                                          |"
+                 "            +------------------------------------------+"
+                 "")))
+      (insert (propertize (mapconcat #'identity art "\n")
+                          'face '(:foreground "#00CED1")))))
+
+  ;; Replace banner widget with our splash
+  (setq dashboard-startupify-list
+        '(dashboard-insert-banner
+          dashboard-insert-newline
+          dashboard-insert-navigator
+          dashboard-insert-newline
+          dashboard-insert-init-info
+          dashboard-insert-items
+          dashboard-insert-newline
+          dashboard-insert-footer))
+
+  ;; Override banner insertion
+  (advice-add 'dashboard-insert-banner :override
+              (lambda (&rest _)
+                (my/hack-splash)
+                (let ((title dashboard-banner-logo-title))
+                  (when title
+                    (insert "\n")
+                    (insert (propertize title
+                                       'face 'dashboard-banner-logo-title))
+                    (insert "\n")))))
+
+  (dashboard-setup-startup-hook))
+#+end_src
+
+* UI / editor basics
+#+begin_src emacs-lisp
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+
+;; Fullscreen on boot
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+;; Winner mode — C-c <left> / C-c <right> to undo/redo layout changes
+(winner-mode 1)
+
+;; Font — Iosevka (emerge media-fonts/iosevka), fallback DejaVu Sans Mono
+(let ((font (cond
+             ((find-font (font-spec :family "Iosevka")) "Iosevka")
+             ((find-font (font-spec :family "Iosevka Term")) "Iosevka Term")
+             (t "DejaVu Sans Mono"))))
+  (set-face-attribute 'default nil :family font :height 130)
+  (add-to-list 'default-frame-alist `(font . ,(format "%s-13" font))))
+
+(global-display-line-numbers-mode 1)
+(show-paren-mode 1)
+(setq show-paren-delay 0)
+
+;; A couple of nice defaults for editing
+(setq-default indent-tabs-mode nil
+              tab-width 4)
+
+;; A little breathing room (optional but nice)
+(setq-default left-margin-width 1 right-margin-width 1)
+(defun my/apply-margins ()
+  (set-window-margins (selected-window)
+                      left-margin-width right-margin-width))
+(add-hook 'window-configuration-change-hook #'my/apply-margins)
+#+end_src
+
+* Completion + navigation (Vertico / Orderless / Consult)
+#+begin_src emacs-lisp
+(use-package vertico
+  :init (vertico-mode 1))
+
+(use-package marginalia
+  :init (marginalia-mode 1))
+
+(use-package which-key
+  :init (which-key-mode 1))
+
+(use-package orderless
+  :init
+  (setq completion-styles '(orderless basic)
+        read-buffer-completion-ignore-case t
+        completion-ignore-case t))
+
+(use-package consult
+  :bind (("M-s r" . consult-ripgrep)
+         ("C-x b" . consult-buffer)))
+#+end_src
+
+* Project (built-in)
+#+begin_src emacs-lisp
+(require 'project)
+(global-set-key (kbd "C-c p f") #'project-find-file)
+(global-set-key (kbd "C-c p s") #'consult-ripgrep)
+#+end_src
+
+* Git (Magit)
+#+begin_src emacs-lisp
+(use-package magit
+  :bind (("C-x g" . magit-status)))
+#+end_src
+
+* Terminal (vterm)
+#+begin_src emacs-lisp
+(use-package vterm
+  :bind (("C-c t" . vterm))
+  :config
+  (defun my/vterm-set-font ()
+    (let ((font (cond
+                 ((find-font (font-spec :family "Iosevka")) "Iosevka")
+                 ((find-font (font-spec :family "Iosevka Term")) "Iosevka Term")
+                 (t "DejaVu Sans Mono"))))
+      (face-remap-add-relative 'default :family font :height 130)))
+  (add-hook 'vterm-mode-hook #'my/vterm-set-font))
+#+end_src
+
+* LSP / IDE intelligence (Eglot)
+#+begin_src emacs-lisp
+(use-package eglot
+  :hook ((c-mode c++-mode python-mode sh-mode) . eglot-ensure)
+  :config
+  ;; Now eglot is loaded, so eglot-server-programs exists.
+  (add-to-list 'eglot-server-programs
+               '((c-mode c++-mode) . ("clangd")))
+  (add-to-list 'eglot-server-programs
+               '(python-mode . ("pylsp")))
+  (add-to-list 'eglot-server-programs
+               '(sh-mode . ("bash-language-server" "start")))
+
+  ;; Make Eglot + Flymake less noisy
+  (setq eglot-autoshutdown t
+        flymake-no-changes-timeout 0.5))
+#+end_src
+
+
+* Formatting helpers
+#+begin_src emacs-lisp
+;; C/C++ formatting via clang-format if installed.
+(defun my/clang-format-buffer ()
+  "Format current buffer with clang-format."
+  (interactive)
+  (if (executable-find "clang-format")
+      (shell-command-on-region (point-min) (point-max) "clang-format" nil t)
+    (message "clang-format not found in PATH")))
+
+(global-set-key (kbd "C-c F c") #'my/clang-format-buffer)
+
+;; Python formatting via ruff if installed.
+(defun my/ruff-format-buffer ()
+  "Format current buffer with ruff format."
+  (interactive)
+  (if (executable-find "ruff")
+      (shell-command-on-region (point-min) (point-max) "ruff format -" nil t)
+    (message "ruff not found in PATH")))
+
+(global-set-key (kbd "C-c F p") #'my/ruff-format-buffer)
+#+end_src
+
+* Compile / build
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-c c") #'compile)
+(setq compilation-scroll-output 'first-error)
+#+end_src
+
+* Debugging (GDB integration)
+#+begin_src emacs-lisp
+(setq gdb-many-window t
+      gdb-show-main t)
+#+end_src
+
+* Optional quality-of-life (recommended)
+#+begin_src emacs-lisp
+(setq scroll-conservatively 101
+      scroll-margin 2)
+
+;; Keep backups tidy
+(setq backup-directory-alist `(("." . ,(expand-file-name "backups" user-emacs-directory)))
+      auto-save-file-name-transforms `((".*" ,(expand-file-name "auto-saves/" user-emacs-directory) t)))
+#+end_src
+
+
+* Org Agenda + Habits
+#+begin_src emacs-lisp
+(setq org-agenda-files '("~/org/"))
+(global-set-key (kbd "C-c a") #'org-agenda)
+(global-set-key (kbd "C-c c") #'org-capture)
+
+;; Habit tracking (for daily study streaks)
+(require 'org-habit)
+(add-to-list 'org-modules 'org-habit)
+(setq org-habit-graph-column 50
+      org-habit-show-habits-only-for-today t)
+
+;; Agenda custom views
+(setq org-agenda-custom-commands
+      '(("d" "Daily Schedule"
+         ((agenda "" ((org-agenda-span 'day)
+                      (org-agenda-sorting-strategy '(time-up priority-down))))
+          (todo "TODO" ((org-agenda-overriding-header "Pending Tasks")))))
+        ("w" "Weekly Review"
+         ((agenda "" ((org-agenda-span 'week)))
+          (todo "TODO" ((org-agenda-overriding-header "All TODO")))))
+        ("m" "Milestones"
+         ((tags "CATEGORY=\"milestone\""
+                ((org-agenda-overriding-header "Milestone Deadlines")))))
+        ("a" "Applications"
+         ((tags "CATEGORY=\"application\""
+                ((org-agenda-overriding-header "Application Deadlines")))))))
+
+;; Log completed tasks with timestamp
+(setq org-log-done 'time)
+#+end_src
+
+* In-buffer completion (Corfu + Cape)
+#+begin_src emacs-lisp
+(use-package corfu
+  :init (global-corfu-mode 1)
+  :config
+  (setq corfu-auto t
+        corfu-auto-delay 0.2
+        corfu-auto-prefix 2
+        corfu-cycle t
+        corfu-preselect 'prompt))
+
+(use-package cape
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev))
+#+end_src
+
+* Snippets (Yasnippet)
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :init (yas-global-mode 1))
+
+(use-package yasnippet-snippets)
+#+end_src
+
+* Tree-sitter (built-in Emacs 30)
+#+begin_src emacs-lisp
+;; Remap major modes to tree-sitter variants when grammars are installed
+(setq major-mode-remap-alist
+      '((c-mode          . c-ts-mode)
+        (c++-mode        . c++-ts-mode)
+        (python-mode     . python-ts-mode)
+        (bash-mode       . bash-ts-mode)
+        (json-mode       . json-ts-mode)))
+
+;; Eglot needs to know about ts modes too
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '((c-ts-mode c++-ts-mode) . ("clangd")))
+  (add-to-list 'eglot-server-programs
+               '(python-ts-mode . ("pylsp"))))
+
+;; Hook eglot into tree-sitter modes
+(add-hook 'c-ts-mode-hook #'eglot-ensure)
+(add-hook 'c++-ts-mode-hook #'eglot-ensure)
+(add-hook 'python-ts-mode-hook #'eglot-ensure)
+#+end_src
+
+* Solidity development (solidity-mode + Foundry)
+#+begin_src emacs-lisp
+(use-package solidity-mode
+  :mode "\\.sol\\'"
+  :config
+  (setq solidity-comment-style 'slash))
+
+;; Foundry Solar LSP via eglot
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(solidity-mode . ("forge" "lsp" "--stdio"))))
+(add-hook 'solidity-mode-hook #'eglot-ensure)
+
+;; forge fmt on save
+(defun my/forge-fmt-before-save ()
+  "Run forge fmt on current buffer before saving."
+  (when (eq major-mode 'solidity-mode)
+    (let ((file (buffer-file-name)))
+      (when file
+        (shell-command (format "forge fmt %s" (shell-quote-argument file)))
+        (revert-buffer t t t)))))
+(add-hook 'after-save-hook #'my/forge-fmt-before-save)
+
+;; Foundry compilation commands
+(defun my/forge-build ()
+  "Run forge build."
+  (interactive)
+  (compile "forge build"))
+
+(defun my/forge-test ()
+  "Run forge test with verbosity."
+  (interactive)
+  (compile "forge test -vvv"))
+
+(defun my/forge-test-file ()
+  "Run forge test on current file."
+  (interactive)
+  (let ((file (buffer-file-name)))
+    (compile (format "forge test --match-path %s -vvv"
+                     (shell-quote-argument file)))))
+
+(defun my/forge-snapshot ()
+  "Run forge snapshot for gas reporting."
+  (interactive)
+  (compile "forge snapshot"))
+
+(defun my/anvil-start ()
+  "Start local Anvil devnet in vterm."
+  (interactive)
+  (let ((buf (get-buffer "*anvil*")))
+    (when buf (kill-buffer buf)))
+  (vterm "*anvil*")
+  (vterm-send-string "anvil\n"))
+
+;; Keybindings under C-c f (Foundry) — C-c s reserved for Shinigami C2
+(global-set-key (kbd "C-c f b") #'my/forge-build)
+(global-set-key (kbd "C-c f t") #'my/forge-test)
+(global-set-key (kbd "C-c f f") #'my/forge-test-file)
+(global-set-key (kbd "C-c f g") #'my/forge-snapshot)   ; g for gas
+(global-set-key (kbd "C-c f a") #'my/anvil-start)
+#+end_src
+
+* Shinigami — AI Security Research C2
+#+begin_src emacs-lisp
+(add-to-list 'load-path (expand-file-name "~/projects/shinigami-emacs/"))
+(require 'shinigami)
+#+end_src
+
+* Multilingual Environment (Deutsch / 日本語)
+#+begin_src emacs-lisp
+;; --- Encoding baseline ---
+(set-language-environment "UTF-8")
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+
+;; Legacy encoding detection for international targets
+(prefer-coding-system 'iso-8859-15)    ; DE/EU
+(prefer-coding-system 'iso-8859-1)     ; DE/EU
+(prefer-coding-system 'windows-1251)   ; RU
+(prefer-coding-system 'euc-jp)         ; JP
+(prefer-coding-system 'shift_jis)      ; JP
+
+;; --- German calendar & timestamps ---
+(setq calendar-week-start-day 1)  ; Montag
+(setq calendar-day-name-array
+      ["Sonntag" "Montag" "Dienstag" "Mittwoch"
+       "Donnerstag" "Freitag" "Samstag"])
+(setq calendar-day-abbrev-array
+      ["So" "Mo" "Di" "Mi" "Do" "Fr" "Sa"])
+(setq calendar-month-name-array
+      ["Januar" "Februar" "März" "April" "Mai" "Juni"
+       "Juli" "August" "September" "Oktober" "November" "Dezember"])
+(setq calendar-month-abbrev-array
+      ["Jan" "Feb" "Mär" "Apr" "Mai" "Jun"
+       "Jul" "Aug" "Sep" "Okt" "Nov" "Dez"])
+
+;; German date format: Tag.Monat.Jahr
+(setq calendar-date-style 'european)
+(setq calendar-date-display-form '(day "." month "." year))
+
+;; --- Japanese input (C-\ to toggle) ---
+(setq default-input-method "japanese-anthy")
+
+;; --- Spell-checking: DE + JP dictionaries ---
+;; Requires: emerge app-text/aspell app-dicts/aspell-de app-dicts/aspell-en
+(setq ispell-program-name "aspell")
+(setq ispell-dictionary "deutsch")
+
+(defun my/ispell-deutsch ()
+  "Rechtschreibprüfung auf Deutsch umschalten."
+  (interactive)
+  (ispell-change-dictionary "deutsch")
+  (message "Wörterbuch: Deutsch"))
+
+(defun my/ispell-english ()
+  "Switch spell-checking to English."
+  (interactive)
+  (ispell-change-dictionary "english")
+  (message "Dictionary: English"))
+
+(defun my/ispell-cycle ()
+  "Wörterbuch durchschalten: DE → EN → DE."
+  (interactive)
+  (let ((current (or ispell-local-dictionary ispell-dictionary "deutsch")))
+    (if (string-match-p "deutsch\\|german" current)
+        (my/ispell-english)
+      (my/ispell-deutsch))))
+
+(global-set-key (kbd "C-c d") #'my/ispell-cycle)
+
+;; --- Org-mode German export ---
+(with-eval-after-load 'ox
+  (setq org-export-default-language "de"))
+
+;; --- Fontset for CJK, symbols, block elements, and nerd-icons ---
+;; Must run after frame creation for display-graphic-p to be true.
+(defun my/setup-fontsets ()
+  "Configure fontsets for CJK, symbols, and block elements."
+  (when (display-graphic-p)
+    ;; CJK — Noto Sans CJK JP
+    (dolist (range '(japanese-jisx0208 katakana-jisx0201 kana han cjk-misc))
+      (set-fontset-font t range (font-spec :family "Noto Sans CJK JP")))
+
+    ;; Block elements (U+2580-U+259F) — the ASCII art characters ▄█░▀
+    ;; Use Symbols Nerd Font which has complete coverage
+    (set-fontset-font t '(#x2580 . #x259F)
+                      (font-spec :family "Symbols Nerd Font") nil 'prepend)
+
+    ;; Box drawing (U+2500-U+257F) — ═║╔╗╚╝─│
+    (set-fontset-font t '(#x2500 . #x257F)
+                      (font-spec :family "Symbols Nerd Font") nil 'prepend)
+
+    ;; Geometric shapes (U+25A0-U+25FF) — ▪▫●○◆◇
+    (set-fontset-font t '(#x25A0 . #x25FF)
+                      (font-spec :family "Symbols Nerd Font") nil 'prepend)
+
+    ;; Nerd Font private use area (U+E000-U+F8FF, U+F0000-U+FFFFF)
+    (set-fontset-font t '(#xE000 . #xF8FF)
+                      (font-spec :family "Symbols Nerd Font") nil 'prepend)
+    (set-fontset-font t '(#xF0000 . #xFFFFF)
+                      (font-spec :family "Symbols Nerd Font") nil 'prepend)
+
+    ;; Emoji (if Noto Color Emoji installed — run: sudo emerge media-fonts/noto-emoji)
+    (when (find-font (font-spec :family "Noto Color Emoji"))
+      (set-fontset-font t 'emoji
+                        (font-spec :family "Noto Color Emoji") nil 'prepend))
+
+    ;; General symbol fallback
+    (set-fontset-font t 'symbol
+                      (font-spec :family "Symbols Nerd Font") nil 'append)
+
+    ;; Final unicode fallback — CJK for anything Iosevka can't render
+    (set-fontset-font t 'unicode
+                      (font-spec :family "Noto Sans CJK JP") nil 'append)))
+
+;; Run immediately if graphic display exists, otherwise defer to frame creation
+(if (display-graphic-p)
+    (my/setup-fontsets)
+  (if (daemonp)
+      (add-hook 'server-after-make-frame-hook #'my/setup-fontsets)
+    (add-hook 'window-setup-hook #'my/setup-fontsets)))
+#+end_src

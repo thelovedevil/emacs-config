@@ -1,0 +1,14 @@
+# Generated/cache
+auto-save/
+auto-save-list/
+auto-saves/
+backups/
+config.el
+custom.el
+elpa/
+recentf
+eln-cache/
+*.elc
+transient/
+tree-sitter/
+url/
