@@ -93,12 +93,12 @@
         (propertize (format " 式神:%s " status)
                     'face (cond
                            ((string-match-p "scanning\\|走査" status)
-                            '(:foreground "#00CED1" :bold t))
+                            '(:foreground "#C8A2C8" :bold t))
                            ((string-match-p "finding\\|発見" status)
-                            '(:foreground "#FFB347" :bold t))
+                            '(:foreground "#E8654A" :bold t))
                            ((string-match-p "critical\\|危険" status)
-                            '(:foreground "#FF4040" :bold t))
-                           (t '(:foreground "#7A6A90")))))))
+                            '(:foreground "#E34234" :bold t))
+                           (t '(:foreground "#8A8078")))))))
 
   ;; Inject into modeline
   (doom-modeline-def-modeline 'shikigami-line
@@ -229,7 +229,7 @@
                  "            +------------------------------------------+"
                  "")))
       (insert (propertize (mapconcat #'identity art "\n")
-                          'face '(:foreground "#00CED1")))))
+                          'face '(:foreground "#E34234")))))
 
   ;; Replace banner widget with our splash
   (setq dashboard-startupify-list

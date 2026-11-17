@@ -1,49 +1,49 @@
-;;; hacktheme-theme.el --- .hack//SIGN × Shikigami 式神
-;;; Version: 1.0
+;;; hacktheme-theme.el --- .hack//SIGN × Shikigami 式神 -*- lexical-binding: t -*-
+;;; Version: 2.1
 ;;; Commentary:
-;;; The World aesthetic: deep oxblood-purple, teal system glow,
-;;; amber warnings, lavender secondary. No green.
+;;; Black ground, vermillion fire, off-white clarity, lilac spirit.
+;;; Status bars: off-white ground with vermillion text.
+;;; All body text uniform off-white. No blues. No greens.
 ;;; Code:
 
-(deftheme hacktheme "The World — .hack × 式神")
+(deftheme hacktheme "The World — .hack × 式神 v2")
 
-(let (;; Backgrounds (deep oxblood → purple-black gradient)
-      (bg-deep    "#250000")    ; deepest — frame edges
-      (bg-main    "#2D0000")    ; main editing background (original laintheme burgundy)
-      (bg-alt     "#350008")    ; sidebar, inactive areas
-      (bg-hover   "#3A0000")    ; hl-line, hover
-      (bg-select  "#5A0000")    ; region / selection
-      (bg-panel   "#1A0000")    ; modeline, tab-bar
+(let (;; Backgrounds
+      (bg-deep    "#000000")    ; true black
+      (bg-main    "#080808")    ; main editing — near-black
+      (bg-alt     "#101010")    ; sidebar, inactive areas
+      (bg-hover   "#1A1A1A")    ; hl-line, hover
+      (bg-select  "#2A1520")    ; region / selection (faint vermillion tint)
+      (bg-panel   "#E8E0D4")    ; modeline — off-white
 
-      ;; Red spectrum (carried from laintheme — your identity)
-      (red-bright "#FF4040")    ; alerts, critical findings
-      (red-main   "#CC8080")    ; keywords, primary syntax
-      (red-warm   "#E8A0A0")    ; functions, headings
-      (red-soft   "#B06060")    ; strings
-      (red-dim    "#7A3535")    ; comments
-      (red-glow   "#6A2020")    ; accent lines, borders
-      (red-deep   "#4A0015")    ; subtle separators
+      ;; Vermillion spectrum (fire, action, identity)
+      (verm-bright "#E34234")   ; pure vermillion — primary accent
+      (verm-main   "#CC4125")   ; keywords, modeline text
+      (verm-warm   "#E8654A")   ; functions, headings
+      (verm-soft   "#C0604A")   ; strings
+      (verm-dim    "#7A3A2A")   ; comments
+      (verm-glow   "#4A2015")   ; accent lines, borders
+      (verm-deep   "#2A100A")   ; subtle separators
 
-      ;; Teal/Cyan (.hack system-active glow)
-      (teal-bright "#00CED1")   ; active system indicators
-      (teal-main   "#40B0B0")   ; types, builtins
-      (teal-soft   "#2A8A8A")   ; secondary active
-      (teal-dim    "#1A5555")   ; subtle teal hints
+      ;; Off-white spectrum (clarity, structure)
+      (white-bright "#FAF0E6")  ; linen — bright emphasis
+      (white-main   "#E8DDD0")  ; primary text
+      (white-warm   "#D4C8B8")  ; secondary text
+      (white-dim    "#8A8078")  ; faded text
+      (white-faint  "#5A5450")  ; very faded
+      (white-panel  "#E8E0D4")  ; modeline background
 
-      ;; Amber/Gold (.hack warnings, important data)
+      ;; Lilac spectrum (spirit, variables, secondary)
+      (lilac-bright "#C8A2C8")  ; bright lilac — types, active
+      (lilac-main   "#B19CD9")  ; variable names, links
+      (lilac-soft   "#9A85B8")  ; secondary
+      (lilac-dim    "#6A5A7A")  ; faded, inactive
+      (lilac-deep   "#3A2A4A")  ; subtle tint
+
+      ;; Accent (warnings, constants — amber kept for contrast)
       (amber-bright "#FFB347")  ; warnings
       (amber-main   "#D4A017")  ; constants, numbers
-      (amber-soft   "#B08A30")  ; secondary amber
-
-      ;; Lavender (.hack secondary UI text)
-      (lavender     "#B0A0C8")  ; variable names, secondary text
-      (lavender-dim "#7A6A90")  ; faded, inactive tabs
-
-      ;; Text hierarchy
-      (fg-main    "#D4C5AA")    ; primary text (warm cream from lain)
-      (fg-bright  "#E8D8C8")    ; emphasized text
-      (fg-dim     "#8A7A6A")    ; faded text
-      (fg-faint   "#5A4A3A"))   ; very faded
+      (amber-soft   "#B08A30"))  ; secondary amber
 
   (custom-theme-set-faces
    'hacktheme
@@ -51,39 +51,39 @@
    ;; ═══════════════════════════════════════════
    ;; Core
    ;; ═══════════════════════════════════════════
-   `(default ((t (:foreground ,fg-main :background ,bg-main))))
-   `(cursor ((t (:background ,teal-bright))))
+   `(default ((t (:foreground ,white-main :background ,bg-main))))
+   `(cursor ((t (:background ,verm-bright))))
    `(fringe ((t (:background ,bg-deep))))
    `(region ((t (:background ,bg-select))))
-   `(secondary-selection ((t (:background ,red-deep))))
+   `(secondary-selection ((t (:background ,verm-deep))))
    `(hl-line ((t (:background ,bg-hover))))
-   `(line-number ((t (:foreground ,red-dim :background ,bg-deep))))
-   `(line-number-current-line ((t (:foreground ,teal-bright :background ,bg-hover))))
-   `(vertical-border ((t (:foreground ,red-deep))))
-   `(shadow ((t (:foreground ,fg-dim))))
-   `(link ((t (:foreground ,teal-main :underline t))))
-   `(link-visited ((t (:foreground ,lavender :underline t))))
+   `(line-number ((t (:foreground ,white-faint :background ,bg-deep))))
+   `(line-number-current-line ((t (:foreground ,verm-bright :background ,bg-hover))))
+   `(vertical-border ((t (:foreground ,verm-glow))))
+   `(shadow ((t (:foreground ,white-dim))))
+   `(link ((t (:foreground ,verm-warm :underline t))))
+   `(link-visited ((t (:foreground ,verm-soft :underline t))))
    `(highlight ((t (:background ,bg-hover))))
-   `(error ((t (:foreground ,red-bright :bold t))))
+   `(error ((t (:foreground ,verm-bright :bold t))))
    `(warning ((t (:foreground ,amber-bright :bold t))))
-   `(success ((t (:foreground ,teal-bright :bold t))))
-   `(trailing-whitespace ((t (:background ,red-deep))))
+   `(success ((t (:foreground ,lilac-bright :bold t))))
+   `(trailing-whitespace ((t (:background ,verm-deep))))
    `(escape-glyph ((t (:foreground ,amber-main))))
 
    ;; ═══════════════════════════════════════════
-   ;; Syntax — red core + teal/amber/lavender accents
+   ;; Syntax — vermillion core + lilac + off-white
    ;; ═══════════════════════════════════════════
-   `(font-lock-keyword-face ((t (:foreground ,red-main))))
-   `(font-lock-function-name-face ((t (:foreground ,red-warm))))
-   `(font-lock-builtin-face ((t (:foreground ,teal-main))))
-   `(font-lock-type-face ((t (:foreground ,teal-soft))))
+   `(font-lock-keyword-face ((t (:foreground ,verm-bright))))
+   `(font-lock-function-name-face ((t (:foreground ,verm-warm))))
+   `(font-lock-builtin-face ((t (:foreground ,lilac-bright))))
+   `(font-lock-type-face ((t (:foreground ,lilac-main))))
    `(font-lock-constant-face ((t (:foreground ,amber-main))))
-   `(font-lock-variable-name-face ((t (:foreground ,lavender))))
-   `(font-lock-string-face ((t (:foreground ,red-soft))))
-   `(font-lock-comment-face ((t (:foreground ,red-dim :italic t))))
-   `(font-lock-comment-delimiter-face ((t (:foreground ,red-dim :italic t))))
-   `(font-lock-doc-face ((t (:foreground ,lavender-dim :italic t))))
-   `(font-lock-warning-face ((t (:foreground ,red-bright :bold t))))
+   `(font-lock-variable-name-face ((t (:foreground ,lilac-soft))))
+   `(font-lock-string-face ((t (:foreground ,verm-soft))))
+   `(font-lock-comment-face ((t (:foreground ,verm-dim :italic t))))
+   `(font-lock-comment-delimiter-face ((t (:foreground ,verm-dim :italic t))))
+   `(font-lock-doc-face ((t (:foreground ,lilac-dim :italic t))))
+   `(font-lock-warning-face ((t (:foreground ,verm-bright :bold t))))
    `(font-lock-negation-char-face ((t (:foreground ,amber-bright))))
    `(font-lock-preprocessor-face ((t (:foreground ,amber-soft))))
    `(font-lock-regexp-grouping-backslash ((t (:foreground ,amber-main))))
@@ -92,237 +92,235 @@
    ;; ═══════════════════════════════════════════
    ;; Minibuffer / completions
    ;; ═══════════════════════════════════════════
-   `(minibuffer-prompt ((t (:foreground ,teal-bright :bold t))))
-   `(completions-common-part ((t (:foreground ,teal-main))))
-   `(completions-first-difference ((t (:foreground ,amber-bright :bold t))))
+   `(minibuffer-prompt ((t (:foreground ,verm-bright :bold t))))
+   `(completions-common-part ((t (:foreground ,lilac-main))))
+   `(completions-first-difference ((t (:foreground ,verm-warm :bold t))))
 
    ;; ═══════════════════════════════════════════
-   ;; Modeline — flat, .hack panel aesthetic
+   ;; Modeline — off-white bg, vermillion text
    ;; ═══════════════════════════════════════════
-   `(mode-line ((t (:foreground ,fg-bright :background ,bg-panel
-                    :box (:line-width 4 :color ,bg-panel)
-                    :overline ,teal-dim))))
-   `(mode-line-inactive ((t (:foreground ,fg-dim :background ,bg-deep
-                             :box (:line-width 4 :color ,bg-deep)
-                             :overline ,red-deep))))
-   `(mode-line-buffer-id ((t (:foreground ,teal-bright :bold t))))
-   `(mode-line-emphasis ((t (:foreground ,amber-main :bold t))))
+   `(mode-line ((t (:foreground ,verm-main :background ,white-panel
+                    :box (:line-width 4 :color ,white-panel)
+                    :overline ,verm-glow))))
+   `(mode-line-inactive ((t (:foreground ,verm-dim :background ,white-warm
+                             :box (:line-width 4 :color ,white-warm)
+                             :overline ,verm-glow))))
+   `(mode-line-buffer-id ((t (:foreground ,verm-bright :bold t))))
+   `(mode-line-emphasis ((t (:foreground "#8B0000" :bold t))))
 
    ;; ═══════════════════════════════════════════
-   ;; Header line (per-window top bar)
+   ;; Header line
    ;; ═══════════════════════════════════════════
-   `(header-line ((t (:foreground ,lavender :background ,bg-deep
-                      :box (:line-width 3 :color ,bg-deep)
-                      :underline ,teal-dim))))
+   `(header-line ((t (:foreground ,verm-main :background ,white-panel
+                      :box (:line-width 3 :color ,white-panel)
+                      :underline ,verm-glow))))
 
    ;; ═══════════════════════════════════════════
-   ;; Tab bar — workspace tabs like The World gates
+   ;; Tab bar
    ;; ═══════════════════════════════════════════
-   `(tab-bar ((t (:foreground ,fg-dim :background ,bg-deep))))
-   `(tab-bar-tab ((t (:foreground ,teal-bright :background ,bg-panel
-                      :box (:line-width 4 :color ,bg-panel)
-                      :overline ,teal-main :bold t))))
-   `(tab-bar-tab-inactive ((t (:foreground ,lavender-dim :background ,bg-deep
-                               :box (:line-width 4 :color ,bg-deep)))))
+   `(tab-bar ((t (:foreground ,white-dim :background ,bg-deep))))
+   `(tab-bar-tab ((t (:foreground ,verm-bright :background ,white-panel
+                      :box (:line-width 4 :color ,white-panel)
+                      :overline ,verm-main :bold t))))
+   `(tab-bar-tab-inactive ((t (:foreground ,lilac-dim :background ,bg-alt
+                               :box (:line-width 4 :color ,bg-alt)))))
 
    ;; ═══════════════════════════════════════════
    ;; Vertico / Marginalia
    ;; ═══════════════════════════════════════════
-   `(vertico-current ((t (:background ,bg-select :foreground ,fg-bright))))
-   `(marginalia-documentation ((t (:foreground ,lavender-dim :italic t))))
-   `(marginalia-key ((t (:foreground ,teal-main))))
+   `(vertico-current ((t (:background ,bg-select :foreground ,white-bright))))
+   `(marginalia-documentation ((t (:foreground ,lilac-dim :italic t))))
+   `(marginalia-key ((t (:foreground ,lilac-main))))
    `(marginalia-value ((t (:foreground ,amber-soft))))
 
    ;; ═══════════════════════════════════════════
    ;; Which-key
    ;; ═══════════════════════════════════════════
-   `(which-key-key-face ((t (:foreground ,teal-bright :bold t))))
-   `(which-key-separator-face ((t (:foreground ,red-dim))))
-   `(which-key-command-description-face ((t (:foreground ,fg-main))))
-   `(which-key-group-description-face ((t (:foreground ,amber-main))))
+   `(which-key-key-face ((t (:foreground ,verm-bright :bold t))))
+   `(which-key-separator-face ((t (:foreground ,verm-dim))))
+   `(which-key-command-description-face ((t (:foreground ,white-main))))
+   `(which-key-group-description-face ((t (:foreground ,lilac-main))))
 
    ;; ═══════════════════════════════════════════
    ;; Treemacs sidebar
    ;; ═══════════════════════════════════════════
-   `(treemacs-root-face ((t (:foreground ,teal-bright :bold t :height 1.1))))
-   `(treemacs-directory-face ((t (:foreground ,lavender))))
-   `(treemacs-file-face ((t (:foreground ,fg-main))))
+   `(treemacs-root-face ((t (:foreground ,verm-bright :bold t :height 1.1))))
+   `(treemacs-directory-face ((t (:foreground ,lilac-main))))
+   `(treemacs-file-face ((t (:foreground ,white-main))))
    `(treemacs-git-modified-face ((t (:foreground ,amber-main))))
-   `(treemacs-git-added-face ((t (:foreground ,teal-main))))
-   `(treemacs-git-untracked-face ((t (:foreground ,red-soft))))
-   `(treemacs-git-ignored-face ((t (:foreground ,fg-faint))))
-   `(treemacs-fringe-indicator-face ((t (:foreground ,teal-bright))))
+   `(treemacs-git-added-face ((t (:foreground ,lilac-bright))))
+   `(treemacs-git-untracked-face ((t (:foreground ,verm-soft))))
+   `(treemacs-git-ignored-face ((t (:foreground ,white-faint))))
+   `(treemacs-fringe-indicator-face ((t (:foreground ,verm-bright))))
 
    ;; ═══════════════════════════════════════════
    ;; Dashboard
    ;; ═══════════════════════════════════════════
-   `(dashboard-banner-logo-title ((t (:foreground ,teal-bright :bold t :height 1.2))))
-   `(dashboard-heading ((t (:foreground ,red-warm :bold t))))
-   `(dashboard-items-face ((t (:foreground ,fg-main))))
-   `(dashboard-no-items-face ((t (:foreground ,fg-dim))))
-   `(dashboard-footer ((t (:foreground ,lavender-dim :italic t))))
-   `(dashboard-navigator ((t (:foreground ,teal-main))))
+   `(dashboard-banner-logo-title ((t (:foreground ,verm-bright :bold t :height 1.2))))
+   `(dashboard-heading ((t (:foreground ,verm-warm :bold t))))
+   `(dashboard-items-face ((t (:foreground ,white-main))))
+   `(dashboard-no-items-face ((t (:foreground ,white-dim))))
+   `(dashboard-footer ((t (:foreground ,lilac-dim :italic t))))
+   `(dashboard-navigator ((t (:foreground ,lilac-main))))
 
    ;; ═══════════════════════════════════════════
    ;; Doom modeline
    ;; ═══════════════════════════════════════════
-   `(doom-modeline-bar ((t (:background ,teal-main))))
-   `(doom-modeline-bar-inactive ((t (:background ,red-deep))))
-   `(doom-modeline-buffer-file ((t (:foreground ,fg-bright :bold t))))
-   `(doom-modeline-buffer-modified ((t (:foreground ,amber-bright :bold t))))
-   `(doom-modeline-buffer-major-mode ((t (:foreground ,teal-main :bold t))))
-   `(doom-modeline-project-dir ((t (:foreground ,lavender))))
-   `(doom-modeline-info ((t (:foreground ,teal-bright))))
+   `(doom-modeline-bar ((t (:background ,verm-bright))))
+   `(doom-modeline-bar-inactive ((t (:background ,verm-deep))))
+   `(doom-modeline-buffer-file ((t (:foreground ,verm-main :bold t))))
+   `(doom-modeline-buffer-modified ((t (:foreground "#8B0000" :bold t))))
+   `(doom-modeline-buffer-major-mode ((t (:foreground ,verm-main :bold t))))
+   `(doom-modeline-project-dir ((t (:foreground ,lilac-dim))))
+   `(doom-modeline-info ((t (:foreground ,lilac-main))))
    `(doom-modeline-warning ((t (:foreground ,amber-bright))))
-   `(doom-modeline-urgent ((t (:foreground ,red-bright))))
-   `(doom-modeline-evil-normal-state ((t (:foreground ,teal-bright :bold t))))
+   `(doom-modeline-urgent ((t (:foreground ,verm-bright))))
+   `(doom-modeline-evil-normal-state ((t (:foreground ,verm-bright :bold t))))
    `(doom-modeline-evil-insert-state ((t (:foreground ,amber-bright :bold t))))
-   `(doom-modeline-evil-visual-state ((t (:foreground ,lavender :bold t))))
+   `(doom-modeline-evil-visual-state ((t (:foreground ,lilac-bright :bold t))))
 
    ;; ═══════════════════════════════════════════
    ;; Magit
    ;; ═══════════════════════════════════════════
-   `(magit-section-heading ((t (:foreground ,amber-main :bold t))))
+   `(magit-section-heading ((t (:foreground ,verm-warm :bold t))))
    `(magit-section-highlight ((t (:background ,bg-hover))))
-   `(magit-branch-local ((t (:foreground ,teal-main))))
-   `(magit-branch-remote ((t (:foreground ,lavender))))
-   `(magit-diff-added ((t (:foreground ,teal-main :background "#1A2020"))))
-   `(magit-diff-added-highlight ((t (:foreground ,teal-bright :background "#1A2A2A"))))
-   `(magit-diff-removed ((t (:foreground ,red-soft :background "#3A0000"))))
-   `(magit-diff-removed-highlight ((t (:foreground ,red-bright :background "#450000"))))
-   `(magit-diff-context ((t (:foreground ,fg-dim))))
-   `(magit-diff-context-highlight ((t (:foreground ,fg-dim :background ,bg-hover))))
-   `(magit-diff-hunk-heading ((t (:foreground ,fg-main :background ,red-deep))))
-   `(magit-diff-hunk-heading-highlight ((t (:foreground ,fg-bright :background ,bg-select))))
+   `(magit-branch-local ((t (:foreground ,lilac-main))))
+   `(magit-branch-remote ((t (:foreground ,lilac-bright))))
+   `(magit-diff-added ((t (:foreground ,lilac-main :background "#1A0A1A"))))
+   `(magit-diff-added-highlight ((t (:foreground ,lilac-bright :background "#2A0F1A"))))
+   `(magit-diff-removed ((t (:foreground ,verm-soft :background "#1A0A0A"))))
+   `(magit-diff-removed-highlight ((t (:foreground ,verm-bright :background "#2A0F0F"))))
+   `(magit-diff-context ((t (:foreground ,white-dim))))
+   `(magit-diff-context-highlight ((t (:foreground ,white-dim :background ,bg-hover))))
+   `(magit-diff-hunk-heading ((t (:foreground ,white-main :background ,verm-deep))))
+   `(magit-diff-hunk-heading-highlight ((t (:foreground ,white-bright :background ,bg-select))))
 
    ;; ═══════════════════════════════════════════
    ;; Org-mode
    ;; ═══════════════════════════════════════════
-   `(org-level-1 ((t (:foreground ,red-warm :bold t :height 1.2))))
-   `(org-level-2 ((t (:foreground ,teal-main :bold t :height 1.1))))
-   `(org-level-3 ((t (:foreground ,amber-main :bold t))))
-   `(org-level-4 ((t (:foreground ,lavender :bold t))))
-   `(org-level-5 ((t (:foreground ,red-main))))
-   `(org-level-6 ((t (:foreground ,teal-soft))))
-   `(org-level-7 ((t (:foreground ,amber-soft))))
-   `(org-level-8 ((t (:foreground ,lavender-dim))))
-   `(org-date ((t (:foreground ,teal-main :underline t))))
-   `(org-todo ((t (:foreground ,red-bright :bold t))))
-   `(org-done ((t (:foreground ,teal-dim :bold t :strike-through t))))
-   `(org-headline-done ((t (:foreground ,fg-dim :strike-through t))))
+   `(org-level-1 ((t (:foreground ,verm-bright :bold t :height 1.2))))
+   `(org-level-2 ((t (:foreground ,lilac-bright :bold t :height 1.1))))
+   `(org-level-3 ((t (:foreground ,white-bright :bold t))))
+   `(org-level-4 ((t (:foreground ,verm-warm :bold t))))
+   `(org-level-5 ((t (:foreground ,lilac-main))))
+   `(org-level-6 ((t (:foreground ,white-warm))))
+   `(org-level-7 ((t (:foreground ,verm-soft))))
+   `(org-level-8 ((t (:foreground ,lilac-dim))))
+   `(org-date ((t (:foreground ,lilac-main :underline t))))
+   `(org-todo ((t (:foreground ,verm-bright :bold t))))
+   `(org-done ((t (:foreground ,lilac-dim :bold t :strike-through t))))
+   `(org-headline-done ((t (:foreground ,white-dim :strike-through t))))
    `(org-code ((t (:foreground ,amber-main :background ,bg-deep))))
-   `(org-verbatim ((t (:foreground ,teal-main :background ,bg-deep))))
+   `(org-verbatim ((t (:foreground ,lilac-main :background ,bg-deep))))
    `(org-block ((t (:background ,bg-deep))))
-   `(org-block-begin-line ((t (:foreground ,red-dim :background ,bg-deep :italic t))))
-   `(org-block-end-line ((t (:foreground ,red-dim :background ,bg-deep :italic t))))
-   `(org-table ((t (:foreground ,lavender))))
-   `(org-agenda-date ((t (:foreground ,teal-main :bold t))))
-   `(org-agenda-date-today ((t (:foreground ,teal-bright :bold t :underline t))))
-   `(org-agenda-date-weekend ((t (:foreground ,red-soft))))
-   `(org-scheduled ((t (:foreground ,fg-main))))
-   `(org-scheduled-today ((t (:foreground ,fg-bright))))
+   `(org-block-begin-line ((t (:foreground ,verm-dim :background ,bg-deep :italic t))))
+   `(org-block-end-line ((t (:foreground ,verm-dim :background ,bg-deep :italic t))))
+   `(org-table ((t (:foreground ,lilac-soft))))
+   `(org-agenda-date ((t (:foreground ,lilac-main :bold t))))
+   `(org-agenda-date-today ((t (:foreground ,verm-bright :bold t :underline t))))
+   `(org-agenda-date-weekend ((t (:foreground ,verm-soft))))
+   `(org-scheduled ((t (:foreground ,white-main))))
+   `(org-scheduled-today ((t (:foreground ,white-bright))))
    `(org-upcoming-deadline ((t (:foreground ,amber-bright))))
 
    ;; ═══════════════════════════════════════════
-   ;; Flycheck / Flymake (error indicators)
+   ;; Flycheck / Flymake
    ;; ═══════════════════════════════════════════
-   `(flycheck-error ((t (:underline (:style wave :color ,red-bright)))))
+   `(flycheck-error ((t (:underline (:style wave :color ,verm-bright)))))
    `(flycheck-warning ((t (:underline (:style wave :color ,amber-bright)))))
-   `(flycheck-info ((t (:underline (:style wave :color ,teal-main)))))
-   `(flymake-error ((t (:underline (:style wave :color ,red-bright)))))
+   `(flycheck-info ((t (:underline (:style wave :color ,lilac-main)))))
+   `(flymake-error ((t (:underline (:style wave :color ,verm-bright)))))
    `(flymake-warning ((t (:underline (:style wave :color ,amber-bright)))))
-   `(flymake-note ((t (:underline (:style wave :color ,teal-main)))))
+   `(flymake-note ((t (:underline (:style wave :color ,lilac-main)))))
 
    ;; ═══════════════════════════════════════════
    ;; Isearch / lazy highlight
    ;; ═══════════════════════════════════════════
-   `(isearch ((t (:foreground ,bg-main :background ,teal-bright :bold t))))
-   `(isearch-fail ((t (:foreground ,fg-main :background ,red-deep))))
-   `(lazy-highlight ((t (:foreground ,fg-bright :background ,teal-dim))))
+   `(isearch ((t (:foreground ,bg-main :background ,verm-bright :bold t))))
+   `(isearch-fail ((t (:foreground ,white-main :background ,verm-deep))))
+   `(lazy-highlight ((t (:foreground ,white-bright :background ,lilac-deep))))
 
    ;; ═══════════════════════════════════════════
    ;; Paren matching
    ;; ═══════════════════════════════════════════
-   `(show-paren-match ((t (:foreground ,teal-bright :background ,bg-select :bold t))))
-   `(show-paren-mismatch ((t (:foreground ,bg-main :background ,red-bright :bold t))))
+   `(show-paren-match ((t (:foreground ,verm-bright :background ,bg-select :bold t))))
+   `(show-paren-mismatch ((t (:foreground ,bg-main :background ,verm-bright :bold t))))
 
    ;; ═══════════════════════════════════════════
-   ;; vterm — .hack terminal palette (no green)
+   ;; vterm + term + ansi — black/vermillion/lilac palette
    ;; ═══════════════════════════════════════════
-   `(vterm-color-black   ((t (:foreground ,fg-faint :background ,fg-faint))))
-   `(vterm-color-red     ((t (:foreground ,red-main :background ,red-main))))
-   `(vterm-color-green   ((t (:foreground ,teal-main :background ,teal-main))))
+   `(vterm-color-black   ((t (:foreground ,white-faint :background ,white-faint))))
+   `(vterm-color-red     ((t (:foreground ,verm-bright :background ,verm-bright))))
+   `(vterm-color-green   ((t (:foreground ,lilac-main :background ,lilac-main))))
    `(vterm-color-yellow  ((t (:foreground ,amber-main :background ,amber-main))))
-   `(vterm-color-blue    ((t (:foreground ,lavender :background ,lavender))))
-   `(vterm-color-magenta ((t (:foreground ,red-warm :background ,red-warm))))
-   `(vterm-color-cyan    ((t (:foreground ,teal-bright :background ,teal-bright))))
-   `(vterm-color-white   ((t (:foreground ,fg-main :background ,fg-main))))
+   `(vterm-color-blue    ((t (:foreground ,lilac-soft :background ,lilac-soft))))
+   `(vterm-color-magenta ((t (:foreground ,verm-warm :background ,verm-warm))))
+   `(vterm-color-cyan    ((t (:foreground ,lilac-bright :background ,lilac-bright))))
+   `(vterm-color-white   ((t (:foreground ,white-main :background ,white-main))))
 
-   ;; term / ansi-term
-   `(term-color-black   ((t (:foreground ,fg-faint :background ,fg-faint))))
-   `(term-color-red     ((t (:foreground ,red-main :background ,red-main))))
-   `(term-color-green   ((t (:foreground ,teal-main :background ,teal-main))))
+   `(term-color-black   ((t (:foreground ,white-faint :background ,white-faint))))
+   `(term-color-red     ((t (:foreground ,verm-bright :background ,verm-bright))))
+   `(term-color-green   ((t (:foreground ,lilac-main :background ,lilac-main))))
    `(term-color-yellow  ((t (:foreground ,amber-main :background ,amber-main))))
-   `(term-color-blue    ((t (:foreground ,lavender :background ,lavender))))
-   `(term-color-magenta ((t (:foreground ,red-warm :background ,red-warm))))
-   `(term-color-cyan    ((t (:foreground ,teal-bright :background ,teal-bright))))
-   `(term-color-white   ((t (:foreground ,fg-main :background ,fg-main))))
+   `(term-color-blue    ((t (:foreground ,lilac-soft :background ,lilac-soft))))
+   `(term-color-magenta ((t (:foreground ,verm-warm :background ,verm-warm))))
+   `(term-color-cyan    ((t (:foreground ,lilac-bright :background ,lilac-bright))))
+   `(term-color-white   ((t (:foreground ,white-main :background ,white-main))))
 
-   ;; ansi-color (comint, compilation)
-   `(ansi-color-black          ((t (:foreground ,fg-faint :background ,fg-faint))))
-   `(ansi-color-red            ((t (:foreground ,red-main :background ,red-main))))
-   `(ansi-color-green          ((t (:foreground ,teal-main :background ,teal-main))))
+   `(ansi-color-black          ((t (:foreground ,white-faint :background ,white-faint))))
+   `(ansi-color-red            ((t (:foreground ,verm-bright :background ,verm-bright))))
+   `(ansi-color-green          ((t (:foreground ,lilac-main :background ,lilac-main))))
    `(ansi-color-yellow         ((t (:foreground ,amber-main :background ,amber-main))))
-   `(ansi-color-blue           ((t (:foreground ,lavender :background ,lavender))))
-   `(ansi-color-magenta        ((t (:foreground ,red-warm :background ,red-warm))))
-   `(ansi-color-cyan           ((t (:foreground ,teal-bright :background ,teal-bright))))
-   `(ansi-color-white          ((t (:foreground ,fg-main :background ,fg-main))))
-   `(ansi-color-bright-black   ((t (:foreground ,fg-dim :background ,fg-dim))))
-   `(ansi-color-bright-red     ((t (:foreground ,red-bright :background ,red-bright))))
-   `(ansi-color-bright-green   ((t (:foreground ,teal-bright :background ,teal-bright))))
+   `(ansi-color-blue           ((t (:foreground ,lilac-soft :background ,lilac-soft))))
+   `(ansi-color-magenta        ((t (:foreground ,verm-warm :background ,verm-warm))))
+   `(ansi-color-cyan           ((t (:foreground ,lilac-bright :background ,lilac-bright))))
+   `(ansi-color-white          ((t (:foreground ,white-main :background ,white-main))))
+   `(ansi-color-bright-black   ((t (:foreground ,white-dim :background ,white-dim))))
+   `(ansi-color-bright-red     ((t (:foreground ,verm-bright :background ,verm-bright))))
+   `(ansi-color-bright-green   ((t (:foreground ,lilac-bright :background ,lilac-bright))))
    `(ansi-color-bright-yellow  ((t (:foreground ,amber-bright :background ,amber-bright))))
-   `(ansi-color-bright-blue    ((t (:foreground ,lavender :background ,lavender))))
-   `(ansi-color-bright-magenta ((t (:foreground ,red-warm :background ,red-warm))))
-   `(ansi-color-bright-cyan    ((t (:foreground ,teal-bright :background ,teal-bright))))
-   `(ansi-color-bright-white   ((t (:foreground ,fg-bright :background ,fg-bright))))
+   `(ansi-color-bright-blue    ((t (:foreground ,lilac-main :background ,lilac-main))))
+   `(ansi-color-bright-magenta ((t (:foreground ,verm-warm :background ,verm-warm))))
+   `(ansi-color-bright-cyan    ((t (:foreground ,lilac-bright :background ,lilac-bright))))
+   `(ansi-color-bright-white   ((t (:foreground ,white-bright :background ,white-bright))))
 
    ;; ═══════════════════════════════════════════
-   ;; Posframe (floating child frames)
+   ;; Posframe
    ;; ═══════════════════════════════════════════
-   `(child-frame-border ((t (:background ,teal-dim))))
+   `(child-frame-border ((t (:background ,verm-glow))))
 
    ;; ═══════════════════════════════════════════
    ;; Eglot / LSP
    ;; ═══════════════════════════════════════════
    `(eglot-highlight-symbol-face ((t (:background ,bg-select :bold t))))
-   `(eglot-diagnostic-tag-unnecessary-face ((t (:foreground ,fg-dim :strike-through t))))
+   `(eglot-diagnostic-tag-unnecessary-face ((t (:foreground ,white-dim :strike-through t))))
 
    ;; ═══════════════════════════════════════════
    ;; Compilation
    ;; ═══════════════════════════════════════════
-   `(compilation-error ((t (:foreground ,red-bright))))
+   `(compilation-error ((t (:foreground ,verm-bright))))
    `(compilation-warning ((t (:foreground ,amber-bright))))
-   `(compilation-info ((t (:foreground ,teal-main))))
-   `(compilation-line-number ((t (:foreground ,lavender))))
-   `(compilation-column-number ((t (:foreground ,lavender-dim))))
+   `(compilation-info ((t (:foreground ,lilac-main))))
+   `(compilation-line-number ((t (:foreground ,lilac-soft))))
+   `(compilation-column-number ((t (:foreground ,lilac-dim))))
 
    ;; ═══════════════════════════════════════════
    ;; Dired
    ;; ═══════════════════════════════════════════
-   `(dired-directory ((t (:foreground ,teal-main :bold t))))
-   `(dired-symlink ((t (:foreground ,lavender :italic t))))
-   `(dired-flagged ((t (:foreground ,red-bright :bold t))))
+   `(dired-directory ((t (:foreground ,lilac-main :bold t))))
+   `(dired-symlink ((t (:foreground ,lilac-soft :italic t))))
+   `(dired-flagged ((t (:foreground ,verm-bright :bold t))))
    `(dired-marked ((t (:foreground ,amber-bright :bold t))))
-   `(dired-ignored ((t (:foreground ,fg-faint))))
+   `(dired-ignored ((t (:foreground ,white-faint))))
 
    ;; ═══════════════════════════════════════════
    ;; Diff
    ;; ═══════════════════════════════════════════
-   `(diff-added ((t (:foreground ,teal-main :background "#1A2020"))))
-   `(diff-removed ((t (:foreground ,red-soft :background "#3A0000"))))
+   `(diff-added ((t (:foreground ,lilac-main :background "#1A0A1A"))))
+   `(diff-removed ((t (:foreground ,verm-soft :background "#1A0A0A"))))
    `(diff-header ((t (:foreground ,amber-main :background ,bg-deep))))
-   `(diff-file-header ((t (:foreground ,fg-bright :background ,bg-deep :bold t))))
-   `(diff-hunk-header ((t (:foreground ,lavender :background ,red-deep))))
+   `(diff-file-header ((t (:foreground ,white-bright :background ,bg-deep :bold t))))
+   `(diff-hunk-header ((t (:foreground ,lilac-soft :background ,verm-deep))))
    ))
 
 ;;;###autoload
