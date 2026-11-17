@@ -557,18 +557,20 @@
 * Multilingual Environment (Deutsch / 日本語)
 #+begin_src emacs-lisp
 ;; --- Encoding baseline ---
+;; prefer-coding-system pushes to FRONT of priority list,
+;; so call UTF-8 LAST to make it highest priority.
+;; Legacy encodings are fallbacks for file detection only.
+(prefer-coding-system 'shift_jis)      ; JP legacy (lowest priority)
+(prefer-coding-system 'euc-jp)         ; JP legacy
+(prefer-coding-system 'windows-1251)   ; RU
+(prefer-coding-system 'iso-8859-15)    ; DE/EU
+(prefer-coding-system 'iso-8859-1)     ; DE/EU
+(prefer-coding-system 'utf-8)          ; ← wins (highest priority)
+
 (set-language-environment "UTF-8")
 (set-default-coding-systems 'utf-8)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
-(prefer-coding-system 'utf-8)
-
-;; Legacy encoding detection for international targets
-(prefer-coding-system 'iso-8859-15)    ; DE/EU
-(prefer-coding-system 'iso-8859-1)     ; DE/EU
-(prefer-coding-system 'windows-1251)   ; RU
-(prefer-coding-system 'euc-jp)         ; JP
-(prefer-coding-system 'shift_jis)      ; JP
 
 ;; --- German calendar & timestamps ---
 (setq calendar-week-start-day 1)  ; Montag
@@ -628,8 +630,25 @@
   "Configure fontsets for CJK, symbols, and block elements."
   (when (display-graphic-p)
     ;; CJK — Noto Sans CJK JP
+    ;; Named charsets
     (dolist (range '(japanese-jisx0208 katakana-jisx0201 kana han cjk-misc))
       (set-fontset-font t range (font-spec :family "Noto Sans CJK JP")))
+
+    ;; Explicit Unicode ranges for Japanese that named charsets can miss
+    (set-fontset-font t '(#x3000 . #x303F)   ; CJK Symbols & Punctuation (。、「」)
+                      (font-spec :family "Noto Sans CJK JP") nil 'prepend)
+    (set-fontset-font t '(#x3040 . #x309F)   ; Hiragana (あいうえお)
+                      (font-spec :family "Noto Sans CJK JP") nil 'prepend)
+    (set-fontset-font t '(#x30A0 . #x30FF)   ; Katakana (アイウエオ)
+                      (font-spec :family "Noto Sans CJK JP") nil 'prepend)
+    (set-fontset-font t '(#x4E00 . #x9FFF)   ; CJK Unified Ideographs (漢字)
+                      (font-spec :family "Noto Sans CJK JP") nil 'prepend)
+    (set-fontset-font t '(#xFF00 . #xFFEF)   ; Fullwidth Forms (式神結界)
+                      (font-spec :family "Noto Sans CJK JP") nil 'prepend)
+    (set-fontset-font t '(#x31F0 . #x31FF)   ; Katakana Phonetic Extensions
+                      (font-spec :family "Noto Sans CJK JP") nil 'prepend)
+    (set-fontset-font t '(#xFE30 . #xFE4F)   ; CJK Compatibility Forms
+                      (font-spec :family "Noto Sans CJK JP") nil 'prepend)
 
     ;; Block elements (U+2580-U+259F) — the ASCII art characters ▄█░▀
     ;; Use Symbols Nerd Font which has complete coverage
